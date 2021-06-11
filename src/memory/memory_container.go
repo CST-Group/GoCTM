@@ -10,6 +10,14 @@ type MemoryContainer struct {
 	Memories []Memory
 }
 
+func (memoryContainer *MemoryContainer) GetName() string {
+	return memoryContainer.Name
+}
+
+func (memoryContainer *MemoryContainer) SetName(name string) {
+	memoryContainer.Name = name
+}
+
 func (memoryContainer *MemoryContainer) SetI(i interface{}) {
 	memoryContainer.SetIEvaluation(i, -1)
 }

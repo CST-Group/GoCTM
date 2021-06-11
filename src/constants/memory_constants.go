@@ -1,0 +1,8 @@
+package constants
+
+const (
+	OUTPUT_MEMORY                         = "OUTPUT_MEMORY"
+	INPUT_MEMORY                          = "INPUT_MEMORY"
+	DISTRIBUTED_MEMORY_BEHAVIOR_TRIGGERED = "TRIGGERED"
+	DISTRIBUTED_MEMORY_BEHAVIOR_PULLED    = "PULLED"
+)

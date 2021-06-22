@@ -12,6 +12,14 @@ type MemoryObject struct {
 	Timestamp  int64
 }
 
+func (memoryObject *MemoryObject) GetID() int64 {
+	return memoryObject.ID
+}
+
+func (memoryObject *MemoryObject) SetID(id int64) {
+	memoryObject.ID = id
+}
+
 func (memoryObject *MemoryObject) GetName() string {
 	return memoryObject.Name
 }
@@ -34,5 +42,5 @@ func (memoryObject *MemoryObject) SetEvaluation(evaluation float64) {
 }
 
 func (memoryObject *MemoryObject) GetEvaluation() float64 {
-	return 0
+	return memoryObject.Evaluation
 }

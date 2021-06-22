@@ -10,6 +10,14 @@ type MemoryContainer struct {
 	Memories []Memory
 }
 
+func (memoryContainer *MemoryContainer) GetID() int64 {
+	return memoryContainer.ID
+}
+
+func (memoryContainer *MemoryContainer) SetID(id int64) {
+	memoryContainer.ID = id
+}
+
 func (memoryContainer *MemoryContainer) GetName() string {
 	return memoryContainer.Name
 }

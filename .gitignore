@@ -15,3 +15,5 @@
 Cache/
 CachedExtensionVSIXs/
 Backups/
+
+.vscode/

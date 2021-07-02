@@ -24,9 +24,7 @@ func (codeletApplication *CodeletApplication) startCodelets() {
 }
 
 func (codeletApplication *CodeletApplication) initializeDistributedMemories() {
-
 	for codelet, memories := range codeletApplication.CodeletMemories {
-
 		for _, memory := range memories {
 
 			memory.InitMemory(codeletApplication.Brokers)

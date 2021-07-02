@@ -3,8 +3,6 @@ package memory
 import "time"
 
 type MemoryObject struct {
-	Memory
-
 	ID         int64
 	Name       string
 	I          interface{}
@@ -29,7 +27,7 @@ func (memoryObject *MemoryObject) SetName(name string) {
 }
 
 func (memoryObject *MemoryObject) GetI() interface{} {
-	return nil
+	return memoryObject.I
 }
 
 func (memoryObject *MemoryObject) SetI(i interface{}) {
@@ -39,6 +37,7 @@ func (memoryObject *MemoryObject) SetI(i interface{}) {
 
 func (memoryObject *MemoryObject) SetEvaluation(evaluation float64) {
 	memoryObject.Evaluation = evaluation
+	memoryObject.Timestamp = time.Now().Unix()
 }
 
 func (memoryObject *MemoryObject) GetEvaluation() float64 {

@@ -1,13 +1,15 @@
 package memory
 
-import "fmt"
+import (
+	"fmt"
+	"time"
+)
 
 type MemoryContainer struct {
-	Memory
-
-	ID       int64
-	Name     string
-	Memories []Memory
+	ID        int64
+	Name      string
+	Memories  []Memory
+	Timestamp int64
 }
 
 func (memoryContainer *MemoryContainer) GetID() int64 {
@@ -40,16 +42,20 @@ func (memoryContainer *MemoryContainer) SetIEvaluation(i interface{}, evaluation
 
 	memoryContainer.checkMemory()
 
-	var memoryObject = MemoryObject{
+	memoryObject := MemoryObject{
 		Evaluation: -1,
 		I:          i,
 	}
 
-	if evaluation != -1 {
+	if evaluation > -1.0 && evaluation < 1.0 {
 		memoryObject.SetEvaluation(evaluation)
 	}
 
-	memoryContainer.Memories = append(memoryContainer.Memories, memoryObject.Memory)
+	var memory Memory = &memoryObject
+
+	memoryContainer.Memories = append(memoryContainer.Memories, memory)
+
+	memoryContainer.Timestamp = time.Now().Unix()
 
 }
 
@@ -83,7 +89,7 @@ func (memoryContainer *MemoryContainer) GetIByIndex(index int32) interface{} {
 }
 
 func (memoryContainer *MemoryContainer) SetEvaluation(evaluation float64) {
-	fmt.Errorf("This method is not available for MemoryContainer. Use setEvaluation(Double eval, int index) instead")
+	memoryContainer.SetEvaluationByIndex(evaluation, 0)
 }
 
 func (memoryContainer *MemoryContainer) SetEvaluationByIndex(evaluation float64, index int32) {
@@ -100,6 +106,8 @@ func (memoryContainer *MemoryContainer) SetEvaluationByIndex(evaluation float64,
 			} else {
 				memory.SetEvaluation(evaluation)
 			}
+
+			memoryContainer.Timestamp = time.Now().Unix()
 		}
 	}
 }
@@ -123,4 +131,5 @@ func (memoryContainer *MemoryContainer) GetEvaluation() float64 {
 func (memoryContainer *MemoryContainer) Add(memory Memory) {
 	memoryContainer.checkMemory()
 	memoryContainer.Memories = append(memoryContainer.Memories, memory)
+	memoryContainer.Timestamp = time.Now().Unix()
 }

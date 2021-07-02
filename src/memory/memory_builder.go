@@ -16,3 +16,11 @@ func CreateMemoryObject(name string) Memory {
 
 	return memory
 }
+
+func CreateMemoryContainer(name string) MemoryContainer {
+	memoryContainer := MemoryContainer{
+		Name: name,
+	}
+
+	return memoryContainer
+}

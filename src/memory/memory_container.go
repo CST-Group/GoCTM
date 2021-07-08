@@ -6,10 +6,10 @@ import (
 )
 
 type MemoryContainer struct {
-	ID        int64
-	Name      string
+	ID        int64  `json:"id"`
+	Name      string `json:"Name"`
 	Memories  []Memory
-	Timestamp int64
+	Timestamp int64 `json:"timestamp"`
 }
 
 func (memoryContainer *MemoryContainer) GetID() int64 {
@@ -132,4 +132,12 @@ func (memoryContainer *MemoryContainer) Add(memory Memory) {
 	memoryContainer.checkMemory()
 	memoryContainer.Memories = append(memoryContainer.Memories, memory)
 	memoryContainer.Timestamp = time.Now().Unix()
+}
+
+func (memoryContainer *MemoryContainer) GetTimestamp() int64 {
+	return memoryContainer.Timestamp
+}
+
+func (memoryContainer *MemoryContainer) SetTimestamp(timestamp int64) {
+	memoryContainer.Timestamp = timestamp
 }

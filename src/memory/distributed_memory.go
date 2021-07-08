@@ -15,8 +15,6 @@ import (
 )
 
 type DistributedMemory struct {
-	Memory
-
 	ID                             int64
 	Name                           string
 	Brokers                        string
@@ -25,6 +23,7 @@ type DistributedMemory struct {
 	Type                           string
 	memoryContentReceiverRoutines  []func(memory Memory, consumer *kafka.Consumer, topicConfig config.TopicConfig)
 	memoryContentPublisherRoutines []func(memory Memory, producer *kafka.Producer, topicConfig config.TopicConfig)
+	Timestamp                      int64
 }
 
 func (distributedMemory *DistributedMemory) GetID() int64 {
@@ -79,6 +78,8 @@ func (distributedMemory *DistributedMemory) GetIByIndex(index int64) interface{}
 func (distributedMemory *DistributedMemory) SetI(i interface{}) {
 	if len(distributedMemory.Memories) > 0 {
 		distributedMemory.Memories[0].SetI(i)
+		distributedMemory.TopicsConfigs[0].Command <- true
+		distributedMemory.SetTimestamp(time.Now().Unix())
 	}
 }
 
@@ -86,6 +87,8 @@ func (distributedMemory *DistributedMemory) SetIByIndex(i interface{}, index int
 	if len(distributedMemory.Memories) > 0 {
 		if distributedMemory.Memories[index] != nil {
 			distributedMemory.Memories[index].SetI(i)
+			distributedMemory.TopicsConfigs[index].Command <- true
+			distributedMemory.SetTimestamp(time.Now().Unix())
 		} else {
 			message := "Index does not exist."
 
@@ -98,6 +101,8 @@ func (distributedMemory *DistributedMemory) SetIByIndex(i interface{}, index int
 func (distributedMemory *DistributedMemory) SetEvaluation(evaluation float64) {
 	if len(distributedMemory.Memories) > 0 {
 		distributedMemory.Memories[0].SetEvaluation(evaluation)
+		distributedMemory.TopicsConfigs[0].Command <- true
+		distributedMemory.SetTimestamp(time.Now().Unix())
 	}
 }
 
@@ -105,6 +110,8 @@ func (distributedMemory *DistributedMemory) SetEvaluationByIndex(evaluation floa
 	if len(distributedMemory.Memories) > 0 {
 		if distributedMemory.Memories[index] != nil {
 			distributedMemory.Memories[index].SetEvaluation(evaluation)
+			distributedMemory.TopicsConfigs[index].Command <- true
+			distributedMemory.SetTimestamp(time.Now().Unix())
 		} else {
 			message := "Index does not exist."
 
@@ -148,6 +155,7 @@ func (distributedMemory *DistributedMemory) GetEvaluationByIndex(index int64) fl
 func (distributedMemory *DistributedMemory) InitMemory(brokers string) {
 
 	distributedMemory.Brokers = brokers
+	distributedMemory.SetTimestamp(time.Now().Unix())
 
 	if distributedMemory.Type == constants.INPUT_MEMORY {
 		distributedMemory.consumerSetup(distributedMemory.TopicsConfigs)
@@ -155,6 +163,14 @@ func (distributedMemory *DistributedMemory) InitMemory(brokers string) {
 		distributedMemory.producerSetup(distributedMemory.TopicsConfigs)
 	}
 
+}
+
+func (distributedMemory *DistributedMemory) SetTimestamp(timestamp int64) {
+	distributedMemory.Timestamp = timestamp
+}
+
+func (distributedMemory *DistributedMemory) GetTimestamp() int64 {
+	return distributedMemory.Timestamp
 }
 
 func (distributedMemory *DistributedMemory) consumerSetup(topicsCofigs []config.TopicConfig) {
@@ -184,6 +200,8 @@ func (distributedMemory *DistributedMemory) producerSetup(topicsCofigs []config.
 
 		distributedMemory.Memories = append(distributedMemory.Memories, memoryObject)
 
+		topicsCofigs[i].Command = make(chan bool)
+
 		publisherProcessFunction := distributedMemory.publisherProccess
 
 		distributedMemory.memoryContentPublisherRoutines = append(distributedMemory.memoryContentPublisherRoutines, publisherProcessFunction)
@@ -200,13 +218,13 @@ func (distributedMemory *DistributedMemory) publisherProccess(memory Memory, pro
 	defer producer.Close()
 
 	for {
-		memoryJson, err := json.Marshal(memory)
-
-		handler.ErrorCheck(err, "Error to convert memory to json.")
-
 		if topicConfig.DistributedMemoryBehavior == constants.DISTRIBUTED_MEMORY_BEHAVIOR_TRIGGERED {
 
 			command := <-topicConfig.Command
+
+			memoryJson, err := json.Marshal(memory)
+
+			handler.ErrorCheck(err, "Error to convert memory to json.")
 
 			if command {
 				producer.Produce(&kafka.Message{
@@ -218,6 +236,10 @@ func (distributedMemory *DistributedMemory) publisherProccess(memory Memory, pro
 		} else {
 
 			if memory.GetI() != lastI || memory.GetEvaluation() != float64(lastEvaluation) {
+
+				memoryJson, err := json.Marshal(memory)
+
+				handler.ErrorCheck(err, "Error to convert memory to json.")
 
 				producer.Produce(&kafka.Message{
 					TopicPartition: kafka.TopicPartition{Topic: &topicConfig.Name,
@@ -240,19 +262,24 @@ func (DistributedMemory *DistributedMemory) receiverProccess(memory Memory, cons
 	defer consumer.Close()
 
 	for {
-		message, err := consumer.ReadMessage(10 * time.Millisecond)
+		// initialTime := time.Now().Unix()
 
-		handler.ErrorCheck(err, fmt.Sprintf("Error to receive message from topic %s", topicConfig.Name))
+		message, _ := consumer.ReadMessage(-1)
+
+		// handler.ErrorCheck(err, fmt.Sprintf("Error to receive message from topic %s", topicConfig.Name))
 
 		if topicConfig.StructName != nil {
 			object := reflect.New(topicConfig.StructName).Elem()
 
-			json.Unmarshal(message.Value, &object)
+			json.Unmarshal(message.Value, memory)
+
+			iField := []byte(fmt.Sprintf("%v", memory.GetI()))
+
+			json.Unmarshal(iField, object)
 
 			memory.SetI(object)
 		} else {
-			memory.SetI(string(message.Value))
+			json.Unmarshal(message.Value, memory)
 		}
 	}
-
 }

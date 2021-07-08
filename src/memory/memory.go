@@ -9,4 +9,6 @@ type Memory interface {
 	SetEvaluation(evalution float64)
 	GetI() interface{}
 	SetI(i interface{})
+	SetTimestamp(timestamp int64)
+	GetTimestamp() int64
 }

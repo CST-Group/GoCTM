@@ -16,9 +16,10 @@ import (
 func BuildConsumer(brokers string, consumerGroupId string) *kafka.Consumer {
 
 	consumer, err := kafka.NewConsumer(&kafka.ConfigMap{
-		"bootstrap.servers": []string{brokers},
-		"group.id":          consumerGroupId,
-		"auto.offset.reset": "earliest",
+		"bootstrap.servers":  brokers,
+		"group.id":           consumerGroupId,
+		"auto.offset.reset":  "latest",
+		"enable.auto.commit": true,
 	})
 
 	handler.ErrorCheck(err, "Error to connect in bootstrap servers.")
@@ -79,6 +80,8 @@ func GenerateConsumers(topicsConfigs []config.TopicConfig, brokers string, consu
 		}
 
 		consumer := BuildConsumer(brokers, consumerGroupId)
+
+		createCheckTopic(brokers, topicConfig.Name, 1, 1)
 
 		err := consumer.Subscribe(topicConfig.Name, nil)
 

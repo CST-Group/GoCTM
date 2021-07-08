@@ -3,11 +3,11 @@ package memory
 import "time"
 
 type MemoryObject struct {
-	ID         int64
-	Name       string
-	I          interface{}
-	Evaluation float64
-	Timestamp  int64
+	ID         int64       `json:"id"`
+	Name       string      `json:"name"`
+	I          interface{} `json:"i"`
+	Evaluation float64     `json:"evaluation"`
+	Timestamp  int64       `json:"timestamp"`
 }
 
 func (memoryObject *MemoryObject) GetID() int64 {
@@ -42,4 +42,12 @@ func (memoryObject *MemoryObject) SetEvaluation(evaluation float64) {
 
 func (memoryObject *MemoryObject) GetEvaluation() float64 {
 	return memoryObject.Evaluation
+}
+
+func (memoryObject *MemoryObject) GetTimestamp() int64 {
+	return memoryObject.Timestamp
+}
+
+func (memoryObject *MemoryObject) SetTimestamp(timestamp int64) {
+	memoryObject.Timestamp = timestamp
 }

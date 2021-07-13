@@ -13,7 +13,7 @@ func TestDistributedMemorySetI(t *testing.T) {
 
 	inputDistributedMemory, outputDistributedMemory := InitializeDistributedMemories()
 
-	time.Sleep(10 * time.Second)
+	time.Sleep(5 * time.Second)
 
 	outputDistributedMemory.SetI(message)
 

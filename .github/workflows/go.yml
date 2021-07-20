@@ -18,7 +18,7 @@ jobs:
         go-version: 1.16
       
     - name: Initialize Kafka and Zookeeper
-      run: cd ../../ && make kafka-start
+      run: cd ../../ && pwd && make kafka-start
 
     - name: Test
       run: cd ./src/memory && go test

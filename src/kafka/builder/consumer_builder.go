@@ -45,7 +45,6 @@ func generateTopicConfigsPrefix(brokers string, prefix string, structName reflec
 		if re.MatchString(key) {
 			topicsFound = append(topicsFound, config.TopicConfig{
 				Name:                      key,
-				Prefix:                    prefix,
 				DistributedMemoryBehavior: constants.DISTRIBUTED_MEMORY_BEHAVIOR_PULLED,
 			})
 		}
@@ -72,23 +71,24 @@ func GenerateConsumers(topicsConfigs []config.TopicConfig, brokers string, consu
 		if len(topicConfig.Prefix) > 0 {
 			foundTopics := generateTopicConfigsPrefix(brokers, topicConfig.Prefix, topicConfig.StructName)
 
-			newConsumers := GenerateConsumers(foundTopics, brokers, consumerGroupId)
+			if len(foundTopics) > 0 {
+				newConsumers := GenerateConsumers(foundTopics, brokers, consumerGroupId)
 
-			for newFoundTopic, newConsumer := range newConsumers {
-				consumers[newFoundTopic] = newConsumer
+				for newFoundTopic, newConsumer := range newConsumers {
+					consumers[newFoundTopic] = newConsumer
+				}
 			}
+		} else {
+			consumer := BuildConsumer(brokers, consumerGroupId)
+
+			createCheckTopic(brokers, topicConfig.Name, 1, 1)
+
+			err := consumer.Subscribe(topicConfig.Name, nil)
+
+			handler.ErrorCheck(err, "Error to subscribe consumer in topics.")
+
+			consumers[&topicConfig] = consumer
 		}
-
-		consumer := BuildConsumer(brokers, consumerGroupId)
-
-		createCheckTopic(brokers, topicConfig.Name, 1, 1)
-
-		err := consumer.Subscribe(topicConfig.Name, nil)
-
-		handler.ErrorCheck(err, "Error to subscribe consumer in topics.")
-
-		consumers[&topicConfig] = consumer
-
 	}
 
 	return consumers

@@ -18,13 +18,13 @@ jobs:
         go-version: 1.16
 
     - name: Build
-      run: go build -v ../../src
+      run: pwd && go build -v ./.../src
       
     - name: Initialize Kafka and Zookeeper
       run: cd ../../ && make kafka-start
 
     - name: Test
-      run: go test -v ../../src
+      run: go test -v ./.../src
     
     - name: Stop Kafka and Zookeeper
       run: cd ../../ && make kafka-stop

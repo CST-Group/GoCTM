@@ -178,7 +178,7 @@ func (distributedMemory *DistributedMemory) consumerSetup(topicsCofigs []config.
 	consumers := builder.GenerateConsumers(topicsCofigs, distributedMemory.Brokers, distributedMemory.Name)
 
 	for topicConfig, consumer := range consumers {
-		memoryObject := CreateMemoryObject(fmt.Sprintf("%v_DM", topicConfig.Name))
+		memoryObject := CreateMemoryObject(topicConfig.Name)
 
 		distributedMemory.Memories = append(distributedMemory.Memories, memoryObject)
 
@@ -196,7 +196,7 @@ func (distributedMemory *DistributedMemory) producerSetup(topicsCofigs []config.
 	producers := builder.GenerateProducers(topicsCofigs, distributedMemory.Brokers)
 
 	for i := 0; i < len(producers); i++ {
-		memoryObject := CreateMemoryObject(fmt.Sprintf("%v_DM", topicsCofigs[i].Name))
+		memoryObject := CreateMemoryObject(topicsCofigs[i].Name)
 
 		distributedMemory.Memories = append(distributedMemory.Memories, memoryObject)
 

@@ -1,2 +1,2 @@
-# GoDCT
-GoDCT
+# GoCTM
+GoCTM
